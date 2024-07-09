@@ -6,6 +6,14 @@ import 'package:provider/provider.dart';
 class SongPage extends StatelessWidget {
   const SongPage({super.key});
 
+  //convert duration into min:seconds
+  String formatTime(Duration duration) {
+    String twoDigitSeconds =
+        duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    String formattedTime = "${duration.inMinutes}: $twoDigitSeconds";
+    return formattedTime;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<PlaylistProvider>(
@@ -98,22 +106,22 @@ class SongPage extends StatelessWidget {
 
                   Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 25.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             //start time
-                            Text("0:00"),
+                            Text(formatTime(value.currentDuration)),
 
                             //shuffle icon
-                            Icon(Icons.shuffle),
+                            const Icon(Icons.shuffle),
 
                             //repeat icon
-                            Icon(Icons.repeat),
+                            const Icon(Icons.repeat),
 
                             //end time
-                            Text("0:00"),
+                            Text(formatTime(value.totalDuration)),
                           ],
                         ),
                       ),
@@ -124,10 +132,17 @@ class SongPage extends StatelessWidget {
                         ),
                         child: Slider(
                           min: 0,
-                          max: 100,
-                          value: 50,
+                          max: value.totalDuration.inSeconds.toDouble(),
+                          value: value.currentDuration.inSeconds.toDouble(),
                           activeColor: Colors.redAccent,
-                          onChanged: (value) {},
+                          onChanged: (double double) {
+                            // during when the user is sliding around
+                          },
+                          onChangeEnd: (double double) {
+                            //sliding has finished, go to that position in
+                            // song duration
+                            value.seek(Duration(seconds: double.toInt()));
+                          },
                         ),
                       )
                     ],
@@ -140,6 +155,7 @@ class SongPage extends StatelessWidget {
                       //skip previous
                       Expanded(
                         child: GestureDetector(
+                          onTap: value.playPreviousSong,
                           child: const NeuBox(
                             child: Icon(Icons.skip_previous),
                           ),
@@ -152,8 +168,11 @@ class SongPage extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: GestureDetector(
-                          child: const NeuBox(
-                            child: Icon(Icons.play_arrow),
+                          onTap: value.pauseOrResume,
+                          child: NeuBox(
+                            child: Icon(value.isPlaying
+                                ? Icons.pause
+                                : Icons.play_arrow),
                           ),
                         ),
                       ),
@@ -163,6 +182,7 @@ class SongPage extends StatelessWidget {
                       //skip forward
                       Expanded(
                         child: GestureDetector(
+                          onTap: value.playNextSong,
                           child: const NeuBox(
                             child: Icon(Icons.skip_next),
                           ),
