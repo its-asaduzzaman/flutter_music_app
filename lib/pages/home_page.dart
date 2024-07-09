@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   //get the playlist provider
-   late final dynamic playlistProvider;
+  late final dynamic playlistProvider;
 
   @override
   void initState() {
